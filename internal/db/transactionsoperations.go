@@ -30,7 +30,7 @@ func (p gormDB) CreateTransactions(ctx *gin.Context, transactionInfo models.Tran
 	}
 
 	transactionData := entities.Transactions{
-		ID:              transactionInfo.AccountID,
+		ID:              transactionInfo.TransactionID,
 		AccountID:       transactionInfo.AccountID,
 		OperationTypeID: transactionInfo.OperationTypeID,
 		Amount:          *transactionInfo.Amount,
@@ -74,4 +74,35 @@ func (p gormDB) CreateTransactions(ctx *gin.Context, transactionInfo models.Tran
 
 	utils.Logger.Info(fmt.Sprintf("successfully added the transaction entry in db, txid: %v", txid))
 	return nil
+}
+
+func (p gormDB) GetTransaction(ctx *gin.Context, transactionID string, txid string) (models.Transactions, *error.TransactionRoutineError) {
+	var scannedTransaction entities.Transactions
+	var fetchedTransaction models.Transactions
+	// Use GORM's First method to retrieve the account
+	if err := p.db.Where("id = ?", transactionID).First(&scannedTransaction).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// case where no rows were found i.e. account not found
+			return fetchedTransaction, &error.TransactionRoutineError{
+				Code:    http.StatusNotFound,
+				Message: "transaction not found",
+				Trace:   txid,
+			}
+		}
+
+		utils.Logger.Error(fmt.Sprintf("error while fetching transaction details from db, txid : %v, error: %v", txid, err))
+		return fetchedTransaction, &error.TransactionRoutineError{
+			Code:    http.StatusInternalServerError,
+			Message: "unable to get the transactions details",
+			Trace:   txid,
+		}
+	}
+	fetchedTransaction.TransactionID = scannedTransaction.ID
+	fetchedTransaction.AccountID = scannedTransaction.AccountID
+	fetchedTransaction.Amount = &scannedTransaction.Amount
+	fetchedTransaction.EventDate = scannedTransaction.EventDate
+	fetchedTransaction.OperationTypeID = scannedTransaction.OperationTypeID
+	// Successfully fetched account
+	utils.Logger.Info(fmt.Sprintf("successfully fetched transaction details from db, txid : %v", txid))
+	return fetchedTransaction, nil
 }

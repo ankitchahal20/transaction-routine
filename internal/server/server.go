@@ -18,12 +18,12 @@ import (
 )
 
 // Registering the CreateAccount EndPoint
-func registerCreateAccountEndPoints(handler gin.IRoutes) {
+func registerCreateAccountEndpoints(handler gin.IRoutes) {
 	handler.POST(constants.ForwardSlash+strings.Join([]string{constants.ForwardSlash, constants.Accounts}, constants.ForwardSlash), service.CreateAccount())
 }
 
 // Registering the GetAccount EndPoint
-func registerGetAccountEndPoints(handler gin.IRoutes) {
+func registerGetAccountEndpoints(handler gin.IRoutes) {
 	handler.GET(constants.ForwardSlash+strings.Join([]string{constants.ForwardSlash, constants.Accounts, constants.Colon + constants.AccountID}, constants.ForwardSlash), service.GetAccount())
 }
 
@@ -32,14 +32,20 @@ func registerCreateTransactionEndpoints(handler gin.IRoutes) {
 	handler.POST(constants.ForwardSlash+strings.Join([]string{constants.ForwardSlash, constants.Transactions}, constants.ForwardSlash), service.CreateTransaction())
 }
 
+// Registering the GetAccount EndPoint
+func registerGetTransactionEndpoints(handler gin.IRoutes) {
+	handler.GET(constants.ForwardSlash+strings.Join([]string{constants.ForwardSlash, constants.Transactions, constants.Colon + constants.TransactionId}, constants.ForwardSlash), service.GetTransaction())
+}
+
 func Start() {
 	plainHandler := gin.New()
 
 	transactionRoutineHandler := plainHandler.Group(constants.ForwardSlash + constants.Version).Use(gin.Recovery()).
 		Use(middleware.ValidateInputRequest())
-	registerCreateAccountEndPoints(transactionRoutineHandler)
-	registerGetAccountEndPoints(transactionRoutineHandler)
+	registerCreateAccountEndpoints(transactionRoutineHandler)
+	registerGetAccountEndpoints(transactionRoutineHandler)
 	registerCreateTransactionEndpoints(transactionRoutineHandler)
+	registerGetTransactionEndpoints(transactionRoutineHandler)
 
 	cfg := config.GetConfig()
 	srv := &http.Server{

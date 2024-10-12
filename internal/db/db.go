@@ -26,6 +26,7 @@ type TransactionRoutineService interface {
 	CreateAccount(*gin.Context, models.Accounts, string) *transactionroutineerror.TransactionRoutineError
 	GetAccount(*gin.Context, string, string) (models.Accounts, *transactionroutineerror.TransactionRoutineError)
 	CreateTransactions(*gin.Context, models.Transactions, string) *transactionroutineerror.TransactionRoutineError
+	GetTransaction(*gin.Context, string, string) (models.Transactions, *transactionroutineerror.TransactionRoutineError)
 }
 
 func Init() gormDB {

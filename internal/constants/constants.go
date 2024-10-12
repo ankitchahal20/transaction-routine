@@ -5,7 +5,7 @@ const (
 	Accounts     = "accounts"
 	GetAccount   = "get_account"
 	Transactions = "transactions"
-	//Transaction  = "transactions"
+	TransactionId  = "transaction_id"
 	AccountID   = "account_id"
 	Colon       = ":"
 	EmptyString = ""
