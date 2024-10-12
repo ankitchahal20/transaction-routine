@@ -8,6 +8,9 @@ import (
 	"github.com/ankit/project/transaction-routine/internal/config"
 	"github.com/ankit/project/transaction-routine/internal/constants"
 	"github.com/ankit/project/transaction-routine/internal/db/entities"
+	"github.com/ankit/project/transaction-routine/internal/models"
+	"github.com/ankit/project/transaction-routine/internal/transactionroutineerror"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,9 +23,11 @@ var (
 type gormDB struct{ db *gorm.DB }
 
 type TransactionRoutineService interface {
+	CreateAccount(*gin.Context, models.Accounts, string) *transactionroutineerror.TransactionRoutineError
+	GetAccount(*gin.Context, string, string) (models.Accounts, *transactionroutineerror.TransactionRoutineError)
 }
 
-func Init() *gormDB {
+func Init() gormDB {
 	once.Do(func() {
 		cfg := config.GetConfig()
 		connString := fmt.Sprintf(
@@ -30,9 +35,8 @@ func Init() *gormDB {
 			cfg.Database.Host, cfg.Database.DBname, cfg.Database.Password,
 			cfg.Database.User, cfg.Database.Port, constants.DBSchemaName,
 		)
-
-		conn, err := gorm.Open(postgres.Open(connString), &gorm.Config{})
-
+		var err error
+		conn, err = gorm.Open(postgres.Open(connString), &gorm.Config{})
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -46,7 +50,7 @@ func Init() *gormDB {
 		conn.AutoMigrate(&entities.Accounts{}, entities.Transactions{})
 	})
 
-	return &gormDB{
+	return gormDB{
 		db: conn,
 	}
 }

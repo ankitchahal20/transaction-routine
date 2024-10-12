@@ -16,13 +16,12 @@ type TransactionRoutineService struct {
 	repo db.TransactionRoutineService
 }
 
-// creditCardLimitOfferClient should only be created once throughtout the application lifetime
-func NewTransactionRoutineService(conn db.TransactionRoutineService) *TransactionRoutineService {
+func NewTransactionRoutineService(repo db.TransactionRoutineService) *TransactionRoutineService {
 	if transactionRoutineClient == nil {
 		once.Do(
 			func() {
 				transactionRoutineClient = &TransactionRoutineService{
-					repo: conn,
+					repo: repo,
 				}
 			})
 	} else {

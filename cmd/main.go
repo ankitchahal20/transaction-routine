@@ -8,7 +8,7 @@ import (
 	"github.com/ankit/project/transaction-routine/internal/server"
 	"github.com/ankit/project/transaction-routine/internal/service"
 	"github.com/ankit/project/transaction-routine/internal/utils"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	//_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
@@ -23,12 +23,9 @@ func main() {
 
 	// Establishing the connection to DB.
 	postgres := db.Init()
-	// if err != nil {
-	// 	log.Fatal("Unable to connect to DB : ", err)
-	// }
 
 	// Initializing the client for transaction routine service
-	_ = service.NewTransactionRoutineService(postgres)
+	service.NewTransactionRoutineService(postgres)
 
 	// Starting the server
 	server.Start()

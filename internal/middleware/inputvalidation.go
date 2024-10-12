@@ -37,14 +37,13 @@ func ValidateInputRequest() gin.HandlerFunc {
 		case strings.Contains(path, constants.Transactions) && ctx.Request.Method == http.MethodPost:
 			validateCreateTransactionInput(ctx, transactionID)
 		}
-		fmt.Println("txid : ", transactionID)
 
 		ctx.Next()
 	}
 }
 
 func validateCreateAccountInput(ctx *gin.Context, txid string) {
-	var accountInfo models.Account
+	var accountInfo models.Accounts
 	err := ctx.ShouldBindBodyWith(&accountInfo, binding.JSON)
 	if err != nil {
 		utils.Logger.Error("error while unmarshaling the request field for create account data validation")

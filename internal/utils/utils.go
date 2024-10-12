@@ -14,9 +14,9 @@ func InitLogClient() {
 }
 
 func RespondWithError(c *gin.Context, statusCode int, message string) {
-
+	txid, _ := c.Get(constants.TransactionID)
 	c.AbortWithStatusJSON(statusCode, transactionroutineerror.TransactionRoutineError{
-		Trace:   c.Request.Header.Get(constants.TransactionID),
+		Trace:   txid.(string),
 		Code:    statusCode,
 		Message: message,
 	})

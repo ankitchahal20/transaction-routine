@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-type Account struct {
-	AccountID      string `json:"account_id"`
+type Accounts struct {
+	AccountID      string `json:"account_id,omitempty"`
 	DocumentNumber string `json:"document_number"`
 }
 
@@ -15,9 +15,9 @@ type OperationType struct {
 }
 
 type Transaction struct {
-	TransactionID   string    `json:"transaction_id"`
+	TransactionID   string    `json:"transaction_id,omitempty"`
 	AccountID       string    `json:"account_id"`
 	OperationTypeID uint      `json:"operation_type_id"`
 	Amount          *float64  `json:"amount"`
-	EventDate       time.Time `json:"event_date"`
+	EventDate       time.Time `json:"event_date,omitempty"`
 }
