@@ -1,0 +1,410 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "description": "This is an API for the Transaction Routine",
+        "version": "1.0.0",
+        "title": "Transaction Routine API"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local server"
+        }
+    ],
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Transaction Routine"
+        }
+    ],
+    "paths": {
+        "/v1/accounts": {
+            "post": {
+                "tags": [
+                    "Transaction Routine"
+                ],
+                "summary": "Create account for a user",
+                "operationId": "create_account",
+                "description": "Creates account for a user",
+                "requestBody": {
+                    "required": true,
+                    "description": "Create Account",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "document_number": 12345678900
+                            },
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAccountRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The account details were successfully added to the transaction routine.",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "account_id": "76b5501c-38fc-4720-9e2f-d71b6b478f0c"
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateAccountResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized401"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden403"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError500"
+                    }
+                }
+            }
+        },
+        "/v1/accounts/{id}": {
+            "get": {
+                "tags": [
+                    "Transaction Routine"
+                ],
+                "summary": "Get Account details for an account id.",
+                "operationId": "get_account",
+                "description": "Get Account details for an account id.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/account_id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The account details were successfully retrieved for an account id",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "account_id": "7f6b2bc0-62cc-45b3-aa86-37ab635f4c9f",
+                                    "document_number": "1"
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetAccountByIdResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized401"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden403"
+                    },
+                    "404": {
+                        "description": "Account ID not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError500"
+                    }
+                }
+            }
+        },
+        "/v1/transactions": {
+            "post": {
+                "tags": [
+                    "Transaction Routine"
+                ],
+                "summary": "Create transaction for a user",
+                "operationId": "create_transaction",
+                "description": "Create transaction for a user",
+                "requestBody": {
+                    "required": true,
+                    "description": "Create transaction for a user",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "account_id": 1,
+                                "operation_type_id": 4,
+                                "amount": 123.45
+                            },
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTransactionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The transaction details were successfully added to the transaction routine.",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "transaction_id": "76b5501c-38fc-4720-9e2f-d71b6b478f0c"
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateTransactionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized401"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden403"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError500"
+                    }
+                }
+            }
+        },
+        "/v1/transactions/{id}": {
+            "get": {
+                "tags": [
+                    "Transaction Routine"
+                ],
+                "summary": "Get Transaction details for a transaction id.",
+                "operationId": "get_transaction",
+                "description": "Get Transaction details for a transaction id.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/transaction_id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The transaction details were successfully retrieved for a transaction id",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "transaction_id": "f187d4f8-4083-4fcb-af6e-ac6c8a9b7119",
+                                    "account_id": "7f6b2bc0-62cc-45b3-aa86-37ab635f4c9f",
+                                    "operation_type_id": 2,
+                                    "amount": -1223.45,
+                                    "event_date": "2024-10-12T20:56:13+05:30"
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetTransactionByIdResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized401"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/Forbidden403"
+                    },
+                    "404": {
+                        "description": "Transaction ID not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError500"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "responses": {
+            "InternalError500": {
+                "description": "Your request couldn't be processed due to an internal server error.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "Unauthorized401": {
+                "description": "You are not authorized to make this request",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "Forbidden403": {
+                "description": "Forbidden. You are not allowed to make this request.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "Error": {
+                "description": "A response containing one or more errors that were encountered when processing the request.",
+                "type": "object",
+                "properties": {
+                    "status_code": {
+                        "type": "integer",
+                        "description": "The HTTP status code of the response."
+                    },
+                    "trace": {
+                        "type": "string",
+                        "description": "A unique id that can be used to correlate this error with logs or other diagnostics in the system."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Message describing the error"
+                    }
+                }
+            },
+            "CreateAccountRequest": {
+                "description": "Request object for Create Account",
+                "type": "object",
+                "properties": {
+                    "document_number": {
+                        "description": "Document number for the account.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "document_number"
+                ]
+            },
+            "CreateTransactionRequest": {
+                "description": "Request object for Create Transaction",
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Account ID of the account for which transaction needs to be created.",
+                        "type": "string"
+                    },
+                    "operation_type_id": {
+                        "description": "Operation Type ID represents the type of the transaction",
+                        "type": "string"
+                    },
+                    "amount": {
+                        "description": "Amount used in the transaction",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "account_id",
+                    "amount",
+                    "operation_type_id"
+                ]
+            },
+            "GetAccountByIdResponse": {
+                "description": "Response object for account details.",
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Unique identifier for the account.",
+                        "type": "string"
+                    },
+                    "document_number": {
+                        "description": "Document number for the account.",
+                        "type": "string"
+                    }
+                }
+            },
+            "GetTransactionByIdResponse": {
+                "description": "Response object for transaction details.",
+                "type": "object",
+                "properties": {
+                    "transaction_id": {
+                        "description": "Unique identifier for the transaction.",
+                        "type": "string"
+                    },
+                    "account_id": {
+                        "description": "Unique identifier for the account.",
+                        "type": "string"
+                    },
+                    "operation_type_id": {
+                        "description": "Operation Type ID represents the type of the transaction",
+                        "type": "string"
+                    },
+                    "amount": {
+                        "description": "Amount used in the transaction.",
+                        "type": "number"
+                    },
+                    "event_date": {
+                        "description": "Time at which the transaction took place.",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "CreateAccountResponse": {
+                "description": "Response object for creating an account",
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Unique identifier for the account id.",
+                        "type": "string"
+                    }
+                }
+            },
+            "CreateTransactionResponse": {
+                "description": "Response object for creating a transaction",
+                "type": "object",
+                "properties": {
+                    "transaction_id": {
+                        "description": "Unique identifier for the transaction id.",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "account_id": {
+                "in": "path",
+                "name": "id",
+                "description": "Account ID",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+                    "minLength": 36,
+                    "maxLength": 36
+                }
+            },
+            "transaction_id": {
+                "in": "path",
+                "name": "id",
+                "description": "Transaction ID",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+                    "minLength": 36,
+                    "maxLength": 36
+                }
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}

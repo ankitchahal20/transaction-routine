@@ -40,6 +40,9 @@ func registerGetTransactionEndpoints(handler gin.IRoutes) {
 func Start() {
 	plainHandler := gin.New()
 
+    // Serve all files in the swagger directory
+    plainHandler.Static("/docs/", "./docs/")
+
 	transactionRoutineHandler := plainHandler.Group(constants.ForwardSlash + constants.Version).Use(gin.Recovery()).
 		Use(middleware.ValidateInputRequest())
 	registerCreateAccountEndpoints(transactionRoutineHandler)
