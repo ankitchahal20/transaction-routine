@@ -22,10 +22,10 @@ func main() {
 	}
 
 	// Establishing the connection to DB.
-	postgres, err := db.New()
-	if err != nil {
-		log.Fatal("Unable to connect to DB : ", err)
-	}
+	postgres := db.Init()
+	// if err != nil {
+	// 	log.Fatal("Unable to connect to DB : ", err)
+	// }
 
 	// Initializing the client for transaction routine service
 	_ = service.NewTransactionRoutineService(postgres)

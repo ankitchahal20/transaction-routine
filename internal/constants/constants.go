@@ -23,4 +23,6 @@ const (
 	ContentType     = "Content-Type"
 	Authorization   = "Authorization"
 	ApplicationJSON = "application/json"
+
+	DBSchemaName = "pismodata"
 )

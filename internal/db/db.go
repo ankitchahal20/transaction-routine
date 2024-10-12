@@ -1,48 +1,52 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"sync"
 
 	"github.com/ankit/project/transaction-routine/internal/config"
+	"github.com/ankit/project/transaction-routine/internal/constants"
+	"github.com/ankit/project/transaction-routine/internal/db/entities"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
-	conn *sql.DB
+	conn *gorm.DB
 	once sync.Once
 )
 
-type postgres struct{ db *sql.DB }
+type gormDB struct{ db *gorm.DB }
 
 type TransactionRoutineService interface {
 }
 
-func New() (postgres, error) {
-	// Initialize the connection only once
+func Init() *gormDB {
 	once.Do(func() {
 		cfg := config.GetConfig()
 		connString := fmt.Sprintf(
-			"host=%s dbname=%s password=%s user=%s port=%d",
+			"host=%s dbname=%s password=%s user=%s port=%d, search_path=%s",
 			cfg.Database.Host, cfg.Database.DBname, cfg.Database.Password,
-			cfg.Database.User, cfg.Database.Port,
+			cfg.Database.User, cfg.Database.Port, constants.DBSchemaName,
 		)
 
-		var err error
-		conn, err = sql.Open("pgx", connString)
+		conn, err := gorm.Open(postgres.Open(connString), &gorm.Config{})
+
 		if err != nil {
-			log.Fatalf("Unable to connect: %v\n", err)
+			log.Fatalln(err)
 		}
 
-		log.Println("Connected to database")
-
-		err = conn.Ping()
+		// Create the schema if it doesn't exist
+		err = conn.Exec(fmt.Sprintf("CREATE SCHEMA IF NOT EXISTS %s", constants.DBSchemaName)).Error
 		if err != nil {
-			log.Fatal("Cannot Ping the database")
+			log.Fatalln("Failed to create schema:", err)
 		}
-		log.Println("pinged database")
+
+		conn.AutoMigrate(&entities.Accounts{}, entities.Transactions{})
 	})
 
-	return postgres{db: conn}, nil
+	return &gormDB{
+		db: conn,
+	}
 }
