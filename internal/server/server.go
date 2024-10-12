@@ -35,11 +35,11 @@ func registerCreateTransactionEndpoints(handler gin.IRoutes) {
 func Start() {
 	plainHandler := gin.New()
 
-	creditCardHandler := plainHandler.Group(constants.ForwardSlash + constants.Version).Use(gin.Recovery()).
+	transactionRoutineHandler := plainHandler.Group(constants.ForwardSlash + constants.Version).Use(gin.Recovery()).
 		Use(middleware.ValidateInputRequest())
-	registerCreateAccountEndPoints(creditCardHandler)
-	registerGetAccountEndPoints(creditCardHandler)
-	registerCreateTransactionEndpoints(creditCardHandler)
+	registerCreateAccountEndPoints(transactionRoutineHandler)
+	registerGetAccountEndPoints(transactionRoutineHandler)
+	registerCreateTransactionEndpoints(transactionRoutineHandler)
 
 	cfg := config.GetConfig()
 	srv := &http.Server{

@@ -13,6 +13,13 @@ import (
 	"github.com/google/uuid"
 )
 
+var validOperationTypes = map[uint]string{
+	1: "Normal Purchase",
+	2: "Purchase with installments",
+	3: "Withdrawal",
+	4: "Credit Voucher",
+}
+
 // This function gets the unique transactionID
 func getTransactionID(c *gin.Context) string {
 	transactionID := c.GetHeader(constants.TransactionID)
@@ -71,7 +78,7 @@ func validateGetAccountInput(ctx *gin.Context, txid string) {
 }
 
 func validateCreateTransactionInput(ctx *gin.Context, txid string) {
-	var transactionInfo models.Transaction
+	var transactionInfo models.Transactions
 	err := ctx.ShouldBindBodyWith(&transactionInfo, binding.JSON)
 	if err != nil {
 		utils.Logger.Error("error while unmarshaling the request field for create transaction")
@@ -79,12 +86,14 @@ func validateCreateTransactionInput(ctx *gin.Context, txid string) {
 		return
 	}
 
-	if transactionInfo.OperationTypeID == 0 {
-		utils.Logger.Error(fmt.Sprintf("operation type id field is missing while creating a transaction, txid : %v", txid))
-		errMessage := "operation_type_id field is missing"
+	// Validate the Operation Type ID
+	if _, isValid := validOperationTypes[transactionInfo.OperationTypeID]; !isValid {
+		utils.Logger.Error(fmt.Sprintf("incorrect operation type id provided while creating a transaction, txid : %v", txid))
+		errMessage := "provided operation_type_id field is incorrect"
 		utils.RespondWithError(ctx, http.StatusBadRequest, errMessage)
 		return
 	}
+
 	if transactionInfo.AccountID == "" {
 		utils.Logger.Error(fmt.Sprintf("account_id field is missing while creating a transaction, txid : %v", txid))
 		errMessage := "account_id field is missing"
@@ -94,6 +103,21 @@ func validateCreateTransactionInput(ctx *gin.Context, txid string) {
 	if transactionInfo.Amount == nil {
 		utils.Logger.Error(fmt.Sprintf("amount field is missing while creating a transaction, txid : %v", txid))
 		errMessage := "amount field is missing"
+		utils.RespondWithError(ctx, http.StatusBadRequest, errMessage)
+		return
+	}
+	// Ensure correct amount values based on operation type
+	if (transactionInfo.OperationTypeID == 1 || transactionInfo.OperationTypeID == 2 || transactionInfo.OperationTypeID == 3) && *transactionInfo.Amount > 0 {
+		utils.Logger.Error(fmt.Sprintf("transactions of type Normal Purchase, Purchase with Installments, and Withdrawal must have a negative amount, txid : %v", txid))
+		errMessage := "Transactions of type Normal Purchase, Purchase with Installments, and Withdrawal must have a negative amount"
+		utils.RespondWithError(ctx, http.StatusBadRequest, errMessage)
+		return
+	}
+
+	// Ensure Credit Voucher has a positive amount
+	if transactionInfo.OperationTypeID == 4 && *transactionInfo.Amount < 0 {
+		utils.Logger.Error(fmt.Sprintf("credit Voucher transactions must have a positive amount, txid : %v", txid))
+		errMessage := "Credit Voucher transactions must have a positive amount"
 		utils.RespondWithError(ctx, http.StatusBadRequest, errMessage)
 		return
 	}

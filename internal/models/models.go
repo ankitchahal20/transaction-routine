@@ -14,7 +14,7 @@ type OperationType struct {
 	Description     string `json:"description"`
 }
 
-type Transaction struct {
+type Transactions struct {
 	TransactionID   string    `json:"transaction_id,omitempty"`
 	AccountID       string    `json:"account_id"`
 	OperationTypeID uint      `json:"operation_type_id"`
