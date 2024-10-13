@@ -22,6 +22,10 @@ var (
 
 type gormDB struct{ db *gorm.DB }
 
+func NewGormDB(db *gorm.DB) *gormDB {
+	return &gormDB{db: db}
+}
+
 type TransactionRoutineService interface {
 	CreateAccount(*gin.Context, models.Accounts, string) *transactionroutineerror.TransactionRoutineError
 	GetAccount(*gin.Context, string, string) (models.Accounts, *transactionroutineerror.TransactionRoutineError)

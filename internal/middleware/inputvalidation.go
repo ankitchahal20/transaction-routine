@@ -68,6 +68,11 @@ func validateCreateAccountInput(ctx *gin.Context, txid string) {
 
 func validateGetAccountInput(ctx *gin.Context, txid string) {
 	accountID := ctx.Param(constants.AccountID)
+	if accountID == "" {
+		utils.Logger.Error(fmt.Sprintf("account id is missing, txid : %v", txid))
+		utils.RespondWithError(ctx, http.StatusBadRequest, constants.InvalidAccountID)
+		return
+	}
 	utils.Logger.Info(fmt.Sprintf("request received for get %v account, txid : %v", accountID, txid))
 	_, erraccountUUID := uuid.Parse(accountID)
 	if erraccountUUID != nil {
