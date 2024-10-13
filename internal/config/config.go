@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/pelletier/go-toml"
 )
@@ -19,11 +21,11 @@ type GlobalConfig struct {
 
 // DB configuration
 type Database struct {
-	Host     string `toml:"host"`
-	Port     int    `toml:"port"`
-	DBname   string `toml:"dbname"`
-	User     string `toml:"user"`
-	Password string `toml:"password"`
+	Host     string `toml:"host" environment:"POSTGRES_HOST"`
+	Port     int    `toml:"port" environment:"POSTGRES_PORT"`
+	DBname   string `toml:"dbname" environment:"POSTGRES_DB"`
+	User     string `toml:"user" environment:"POSTGRES_USER"`
+	Password string `toml:"password" environment:"POSTGRES_PASSWORD"`
 }
 
 // server configuration
@@ -57,6 +59,23 @@ func InitGlobalConfig() error {
 	if err != nil {
 		log.Printf("Error while unmarshalling config : %v", err)
 		return err
+	}
+
+	// Override with environment variables if they are set
+	if host, exists := os.LookupEnv("POSTGRES_HOST"); exists {
+		appConfig.Database.Host = host
+	}
+	if port, exists := os.LookupEnv("POSTGRES_PORT"); exists {
+		appConfig.Database.Port, _ = strconv.Atoi(port) // Convert string to int
+	}
+	if dbname, exists := os.LookupEnv("POSTGRES_DB"); exists {
+		appConfig.Database.DBname = dbname
+	}
+	if user, exists := os.LookupEnv("POSTGRES_USER"); exists {
+		appConfig.Database.User = user
+	}
+	if password, exists := os.LookupEnv("POSTGRES_PASSWORD"); exists {
+		appConfig.Database.Password = password
 	}
 
 	SetConfig(appConfig)
