@@ -91,6 +91,13 @@ func validateCreateTransactionInput(ctx *gin.Context, txid string) {
 		return
 	}
 
+	if transactionInfo.OperationTypeID == 0 {
+		utils.Logger.Error(fmt.Sprintf("provided operation_type_id field is missing while creating a transaction, txid : %v", txid))
+		errMessage := "provided operation_type_id field is missing"
+		utils.RespondWithError(ctx, http.StatusBadRequest, errMessage)
+		return
+	}
+
 	// Validate the Operation Type ID
 	if _, isValid := validOperationTypes[transactionInfo.OperationTypeID]; !isValid {
 		utils.Logger.Error(fmt.Sprintf("incorrect operation type id provided while creating a transaction, txid : %v", txid))

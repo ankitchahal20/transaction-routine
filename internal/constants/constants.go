@@ -1,14 +1,14 @@
 package constants
 
 const (
-	ForwardSlash = "/"
-	Accounts     = "accounts"
-	GetAccount   = "get_account"
-	Transactions = "transactions"
-	TransactionId  = "transaction_id"
-	AccountID   = "account_id"
-	Colon       = ":"
-	EmptyString = ""
+	ForwardSlash  = "/"
+	Accounts      = "accounts"
+	GetAccount    = "get_account"
+	Transactions  = "transactions"
+	TransactionId = "transaction_id"
+	AccountID     = "account_id"
+	Colon         = ":"
+	EmptyString   = ""
 
 	Version = "v1"
 

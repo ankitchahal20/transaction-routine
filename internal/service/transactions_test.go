@@ -19,133 +19,131 @@ import (
 )
 
 func TestCreateTransaction_Success(t *testing.T) {
-    ResetTransactionRoutineClient()
-    utils.InitLogClient()
-    
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	ResetTransactionRoutineClient()
+	utils.InitLogClient()
 
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    mockRepo.EXPECT().CreateTransactions(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
 
-    w := httptest.NewRecorder()
+	mockRepo.EXPECT().CreateTransactions(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+
+	w := httptest.NewRecorder()
 	amount := 100.0
-    // Create valid transaction info
-    transactionInfo := models.Transactions{
-        Amount: &amount,
-        OperationTypeID:   1,
-    }
+	// Create valid transaction info
+	transactionInfo := models.Transactions{
+		Amount:          &amount,
+		OperationTypeID: 1,
+	}
 
-    jsonBody, _ := json.Marshal(transactionInfo)
-    req, _ := http.NewRequest(http.MethodPost, "/transactions", bytes.NewBuffer(jsonBody))
-    req.Header.Set("Content-Type", "application/json")
+	jsonBody, _ := json.Marshal(transactionInfo)
+	req, _ := http.NewRequest(http.MethodPost, "/transactions", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
 
-    ctx, _ := gin.CreateTestContext(w)
-    ctx.Set(constants.TransactionID, uuid.New().String())
-    ctx.Request = req
-    transactionRoutineClient = NewTransactionRoutineService(mockRepo)
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Set(constants.TransactionID, uuid.New().String())
+	ctx.Request = req
+	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
 
-    handler := CreateTransaction()
-    handler(ctx)
+	handler := CreateTransaction()
+	handler(ctx)
 
-    assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 
-    var response map[string]string
-    err := json.Unmarshal(w.Body.Bytes(), &response)
-    assert.Nil(t, err)
+	var response map[string]string
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Nil(t, err)
 }
 
-
-
 func TestCreateTransaction_Failure_BindingError(t *testing.T) {
-    ResetTransactionRoutineClient()
-    utils.InitLogClient()
+	ResetTransactionRoutineClient()
+	utils.InitLogClient()
 
-    w := httptest.NewRecorder()
-    req, _ := http.NewRequest(http.MethodPost, "/transactions", http.NoBody) // No body, which causes a binding error
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPost, "/transactions", http.NoBody) // No body, which causes a binding error
 
-    ctx, _ := gin.CreateTestContext(w)
-    ctx.Set(constants.TransactionID, uuid.New().String())
-    ctx.Request = req
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Set(constants.TransactionID, uuid.New().String())
+	ctx.Request = req
 
-    handler := CreateTransaction()
-    handler(ctx)
-    assert.Equal(t, http.StatusBadRequest, w.Code)
+	handler := CreateTransaction()
+	handler(ctx)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestGetTransaction_Success(t *testing.T) {
-    ResetTransactionRoutineClient()
-    utils.InitLogClient()
-    
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	ResetTransactionRoutineClient()
+	utils.InitLogClient()
 
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    transactionID := uuid.New().String()
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
+
+	transactionID := uuid.New().String()
 	amount := 100.0
-    expectedTransaction := models.Transactions{
-        TransactionID: transactionID,
-        Amount:       &amount,
-        OperationTypeID:         2,
-    }
+	expectedTransaction := models.Transactions{
+		TransactionID:   transactionID,
+		Amount:          &amount,
+		OperationTypeID: 2,
+	}
 
-    mockRepo.EXPECT().GetTransaction(gomock.Any(), transactionID, gomock.Any()).Return(expectedTransaction, nil)
+	mockRepo.EXPECT().GetTransaction(gomock.Any(), transactionID, gomock.Any()).Return(expectedTransaction, nil)
 
-    w := httptest.NewRecorder()
-    req, _ := http.NewRequest(http.MethodGet, "/transactions/"+transactionID, nil)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/transactions/"+transactionID, nil)
 
-    ctx, _ := gin.CreateTestContext(w)
-    ctx.Set(constants.TransactionID, transactionID)
-    ctx.Request = req
-    ctx.Params = gin.Params{
-        gin.Param{Key: constants.TransactionId, Value: transactionID},
-    }
-    transactionRoutineClient = NewTransactionRoutineService(mockRepo)
-    
-    handler := GetTransaction()
-    handler(ctx)
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Set(constants.TransactionID, transactionID)
+	ctx.Request = req
+	ctx.Params = gin.Params{
+		gin.Param{Key: constants.TransactionId, Value: transactionID},
+	}
+	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
 
-    assert.Equal(t, http.StatusOK, w.Code)
+	handler := GetTransaction()
+	handler(ctx)
 
-    // Check if the response matches the expected transaction data
-    var fetchedTransaction models.Transactions
-    err := json.Unmarshal(w.Body.Bytes(), &fetchedTransaction)
-    assert.Nil(t, err)
-    assert.Equal(t, expectedTransaction.TransactionID, fetchedTransaction.TransactionID)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Check if the response matches the expected transaction data
+	var fetchedTransaction models.Transactions
+	err := json.Unmarshal(w.Body.Bytes(), &fetchedTransaction)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedTransaction.TransactionID, fetchedTransaction.TransactionID)
 }
 
 func TestGetTransaction_Failure(t *testing.T) {
-    ResetTransactionRoutineClient()
-    utils.InitLogClient()
+	ResetTransactionRoutineClient()
+	utils.InitLogClient()
 
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
 
-    transactionID := uuid.New().String()
-    mockError := transactionroutineerror.TransactionRoutineError{
-        Code:    http.StatusInternalServerError,
-        Message: "database error",
-    }
+	transactionID := uuid.New().String()
+	mockError := transactionroutineerror.TransactionRoutineError{
+		Code:    http.StatusInternalServerError,
+		Message: "database error",
+	}
 
-    mockRepo.EXPECT().GetTransaction(gomock.Any(), transactionID, gomock.Any()).Return(models.Transactions{}, &mockError)
+	mockRepo.EXPECT().GetTransaction(gomock.Any(), transactionID, gomock.Any()).Return(models.Transactions{}, &mockError)
 
-    w := httptest.NewRecorder()
-    req, _ := http.NewRequest(http.MethodGet, "/transactions/"+transactionID, nil)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/transactions/"+transactionID, nil)
 
-    ctx, _ := gin.CreateTestContext(w)
-    ctx.Set(constants.TransactionID, transactionID)
-    ctx.Request = req
-    ctx.Params = gin.Params{
-        gin.Param{Key: constants.TransactionId, Value: transactionID},
-    }
-    transactionRoutineClient = NewTransactionRoutineService(mockRepo)
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Set(constants.TransactionID, transactionID)
+	ctx.Request = req
+	ctx.Params = gin.Params{
+		gin.Param{Key: constants.TransactionId, Value: transactionID},
+	}
+	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
 
-    handler := GetTransaction()
-    handler(ctx)
+	handler := GetTransaction()
+	handler(ctx)
 
-    assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

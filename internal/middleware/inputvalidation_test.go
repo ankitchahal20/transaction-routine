@@ -125,7 +125,7 @@ func TestValidateCreateTransactionInput(t *testing.T) {
 	ctx.Request.Body = httptest.NewRequest(http.MethodPost, "/v1/transactions", nil).Body
 	r.ServeHTTP(w, ctx.Request)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	
+
 	amount := -100.10
 	// Case 2: Valid transaction creation
 	transactionInfo := models.Transactions{
@@ -134,7 +134,6 @@ func TestValidateCreateTransactionInput(t *testing.T) {
 		Amount:          &amount,
 	}
 	body, _ := json.Marshal(transactionInfo)
-
 
 	w = httptest.NewRecorder()
 	ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/transactions", bytes.NewReader(body))

@@ -50,12 +50,12 @@ func (p gormDB) CreateTransactions(ctx *gin.Context, transactionInfo models.Tran
 			}
 		}
 		if strings.Contains(err.Error(), "violates foreign key constraint") {
-            return &error.TransactionRoutineError{
-                Code:    http.StatusBadRequest,
-                Message: fmt.Sprint("Invalid account ID. The referenced account does not exist."),
-                Trace:   txid,
-            }
-        }
+			return &error.TransactionRoutineError{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprint("Invalid account ID. The referenced account does not exist."),
+				Trace:   txid,
+			}
+		}
 		return &error.TransactionRoutineError{
 			Trace:   txid,
 			Code:    http.StatusInternalServerError,
@@ -100,7 +100,7 @@ func (p gormDB) GetTransaction(ctx *gin.Context, transactionID string, txid stri
 	fetchedTransaction.TransactionID = scannedTransaction.ID
 	fetchedTransaction.AccountID = scannedTransaction.AccountID
 	fetchedTransaction.Amount = &scannedTransaction.Amount
-	fetchedTransaction.EventDate = scannedTransaction.EventDate
+	fetchedTransaction.EventDate = scannedTransaction.EventDate.UTC()
 	fetchedTransaction.OperationTypeID = scannedTransaction.OperationTypeID
 	// Successfully fetched account
 	utils.Logger.Info(fmt.Sprintf("successfully fetched transaction details from db, txid : %v", txid))

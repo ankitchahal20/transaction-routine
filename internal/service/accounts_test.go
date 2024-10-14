@@ -21,118 +21,114 @@ import (
 
 func ResetTransactionRoutineClient() {
 	once = sync.Once{}
-    transactionRoutineClient = nil
+	transactionRoutineClient = nil
 }
 
 func TestCreateAccount_Success(t *testing.T) {
 	ResetTransactionRoutineClient()
-    utils.InitLogClient()
+	utils.InitLogClient()
 	// Setup the mock controller
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    // Mock the repository
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	// Mock the repository
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
 
-    // Expected behavior for the mock repository
-    mockRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	// Expected behavior for the mock repository
+	mockRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
-    w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
-    // Create a valid account info
-    accountInfo := models.Accounts{
-        DocumentNumber: "123e4567-e89b-12d3-a456-426614174000",
-    }
+	// Create a valid account info
+	accountInfo := models.Accounts{
+		DocumentNumber: "123e4567-e89b-12d3-a456-426614174000",
+	}
 
-    // Marshal the account info to JSON
-    jsonBody, _ := json.Marshal(accountInfo)
-    req, _ := http.NewRequest(http.MethodPost, "/accounts", bytes.NewBuffer(jsonBody))
-    req.Header.Set("Content-Type", "application/json")
+	// Marshal the account info to JSON
+	jsonBody, _ := json.Marshal(accountInfo)
+	req, _ := http.NewRequest(http.MethodPost, "/accounts", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
 
-    ctx, _ := gin.CreateTestContext(w)
+	ctx, _ := gin.CreateTestContext(w)
 	ctx.Set(constants.TransactionID, uuid.New().String())
-    ctx.Request = req
+	ctx.Request = req
 	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
-    // Call the CreateAccount
-    handler := CreateAccount()
-    handler(ctx)
+	// Call the CreateAccount
+	handler := CreateAccount()
+	handler(ctx)
 
-    assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 }
 
 func TestGetAccount_Success(t *testing.T) {
 	ResetTransactionRoutineClient()
-    utils.InitLogClient()
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	utils.InitLogClient()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
 
-    // Mock data: Define the expected account data to be returned
-    accountID := "123e4567-e89b-12d3-a456-426614174000"
-    expectedAccount := models.Accounts{
-        DocumentNumber: "123e4567-e89b-12d3-a456-426614174000",
-		AccountID : "123e4567-e89b-12d3-a456-426614174001",
-    }
+	// Mock data: Define the expected account data to be returned
+	accountID := "123e4567-e89b-12d3-a456-426614174000"
+	expectedAccount := models.Accounts{
+		DocumentNumber: "123e4567-e89b-12d3-a456-426614174000",
+		AccountID:      "123e4567-e89b-12d3-a456-426614174001",
+	}
 
-    mockRepo.EXPECT().GetAccount(gomock.Any(), accountID, gomock.Any()).Return(expectedAccount, nil)
+	mockRepo.EXPECT().GetAccount(gomock.Any(), accountID, gomock.Any()).Return(expectedAccount, nil)
 
-    
-    w := httptest.NewRecorder()
-    req, _ := http.NewRequest(http.MethodGet, "/account/"+accountID, nil)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/account/"+accountID, nil)
 
-    ctx, _ := gin.CreateTestContext(w)
+	ctx, _ := gin.CreateTestContext(w)
 	ctx.Set(constants.TransactionID, uuid.New().String())
-    ctx.Request = req
-    ctx.Params = gin.Params{
-        gin.Param{Key: "account_id", Value: accountID},
-    }
+	ctx.Request = req
+	ctx.Params = gin.Params{
+		gin.Param{Key: "account_id", Value: accountID},
+	}
 	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
-    handler := GetAccount()
-    handler(ctx)
+	handler := GetAccount()
+	handler(ctx)
 
-    // Check for the proper status code and response
-    assert.Equal(t, http.StatusOK, w.Code)
+	// Check for the proper status code and response
+	assert.Equal(t, http.StatusOK, w.Code)
 
-    // You can also check if the response matches the expected account data
-    var fetchedAccount models.Accounts
-    err := json.Unmarshal(w.Body.Bytes(), &fetchedAccount)
-    assert.Nil(t, err)
-    assert.Equal(t, expectedAccount.AccountID, fetchedAccount.AccountID)
+	// You can also check if the response matches the expected account data
+	var fetchedAccount models.Accounts
+	err := json.Unmarshal(w.Body.Bytes(), &fetchedAccount)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedAccount.AccountID, fetchedAccount.AccountID)
 }
 
-
-
-
 func TestCreateAccount_Failure(t *testing.T) {
-    ResetTransactionRoutineClient()
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
-    mockRepo := db.NewMockTransactionRoutineService(ctrl)
-    accountInfo := models.Accounts{
-        DocumentNumber: uuid.New().String(),
-    }
+	ResetTransactionRoutineClient()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockRepo := db.NewMockTransactionRoutineService(ctrl)
+	accountInfo := models.Accounts{
+		DocumentNumber: uuid.New().String(),
+	}
 
-    // Mock an error response from the database layer
-    mockError := transactionroutineerror.TransactionRoutineError{
-        Code:    http.StatusInternalServerError,
-        Message: "database error",
-    }
+	// Mock an error response from the database layer
+	mockError := transactionroutineerror.TransactionRoutineError{
+		Code:    http.StatusInternalServerError,
+		Message: "database error",
+	}
 
-    mockRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(&mockError)
+	mockRepo.EXPECT().CreateAccount(gomock.Any(), gomock.Any(), gomock.Any()).Return(&mockError)
 
-    jsonBody, _ := json.Marshal(accountInfo)
-    req, _ := http.NewRequest(http.MethodPost, "/accounts", bytes.NewBuffer(jsonBody))
-    req.Header.Set("Content-Type", "application/json")
+	jsonBody, _ := json.Marshal(accountInfo)
+	req, _ := http.NewRequest(http.MethodPost, "/accounts", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
 
-    ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
-    ctx.Set(constants.TransactionID, uuid.New().String())
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	ctx.Set(constants.TransactionID, uuid.New().String())
 	ctx.Request = req
-    transactionRoutineClient = NewTransactionRoutineService(mockRepo)
+	transactionRoutineClient = NewTransactionRoutineService(mockRepo)
 
-    // Call CreateAccount
-    handler := CreateAccount()
-    handler(ctx)
+	// Call CreateAccount
+	handler := CreateAccount()
+	handler(ctx)
 
-    assert.Equal(t, http.StatusInternalServerError, ctx.Writer.Status())
+	assert.Equal(t, http.StatusInternalServerError, ctx.Writer.Status())
 }
